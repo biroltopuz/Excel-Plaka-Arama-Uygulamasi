@@ -1,0 +1,70 @@
+Dim fileCount As Integer
+Dim iPhoto As Integer
+
+
+Private Sub btnBack_Click()
+    If iPhoto > 1 Then
+        iPhoto = iPhoto - 1
+        imgPlate.Picture = LoadPicture(listResult.List(iPhoto - 1))
+    End If
+End Sub
+
+Private Sub btnForward_Click()
+    If iPhoto < fileCount Then
+        iPhoto = iPhoto + 1
+        imgPlate.Picture = LoadPicture(listResult.List(iPhoto - 1))
+    End If
+End Sub
+
+Private Sub btnSearch_Click()
+    If txtSearch.Text = "" Then
+        MsgBox ("Arama alani bos birakilamaz!")
+    Else
+        fileCount = 0
+        listResult.Clear
+        listResult.Visible = False
+        btnBack.Visible = False
+        btnForward.Visible = False
+        Call Recurse(ThisWorkbook.Path & "\")
+        If fileCount > 0 Then
+            listResult.Visible = True
+            btnBack.Visible = True
+            btnForward.Visible = True
+            lblFileCount.Caption = "Bulunan dosya sayisi : " & fileCount
+        Else
+            lblFileCount.Visible = True
+            lblFileCount.Caption = "Bulunan dosya sayisi : " & fileCount
+        End If
+    End If
+End Sub
+
+Function Recurse(sPath As String) As String
+    Dim FSO As New FileSystemObject
+    Dim myFolder As Folder
+    Dim mySubFolder As Folder
+    Dim myFile As File
+    
+    Set myFolder = FSO.GetFolder(sPath)
+
+    For Each mySubFolder In myFolder.SubFolders
+        For Each myFile In mySubFolder.Files
+            If InStr(UCase(myFile.Name), UCase(txtSearch.Text)) <> 0 Then
+                listResult.AddItem (myFile.Path)
+                iPhoto = 1
+                fileCount = fileCount + 1
+                If fileCount = 1 Then
+                    imgPlate.Picture = LoadPicture(myFile.Path)
+                End If
+            End If
+        Next
+        Recurse = Recurse(mySubFolder.Path)
+    Next
+End Function
+
+Private Sub listResult_Click()
+    imgPlate.Picture = LoadPicture(listResult.List(listResult.ListIndex))
+End Sub
+
+Private Sub UserForm_Click()
+
+End Sub
